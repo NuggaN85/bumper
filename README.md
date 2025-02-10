@@ -15,7 +15,7 @@ Je suis un bot spécialement conçu pour booster la visibilité de votre serveur
 
 **`/bump_toggle`** (Permet d'activer ou désactiver le bot)
 
-**`/bump_set_channe`**l (Permet de choisir votre salon bump)
+**`/bump_set_channe`** (Permet de choisir votre salon bump)
 
 **`/bump_config`** (Permet de configurer la description et lien bannière)
 
