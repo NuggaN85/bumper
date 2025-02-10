@@ -42,3 +42,13 @@
 4. Configurez le salon de bump avec **`/bump_set_channel`**.  
 5. Personnalisez votre bump avec **`/bump_config`**.  
 6. Utilisez **`/bump`** pour promouvoir votre serveur.
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+## <strong>❤️</strong> (Contribuer) <strong>❤️</strong>
+
+[![Donate](https://img.shields.io/badge/paypal-donate-yellow.svg?style=flat)](https://www.paypal.me/nuggan85) [![v1.1.3](http://img.shields.io/badge/zip-v1.1.3-blue.svg)](https://github.com/NuggaN85/bumper/archive/master.zip) [![GitHub license](https://img.shields.io/github/license/NuggaN85/Protection-Anti-Plagiat)](https://github.com/NuggaN85/bumper)
+
+<a target="_blank" href="https://www.dmca.com/Protection/Status.aspx?ID=e1725bf3-1ec4-44bb-b65e-0a20fd4919fa&refurl=https://github.com/NuggaN85/bumper" title="DMCA.com Protection Status" class="dmca-badge"> <img src ="https://images.dmca.com/Badges/dmca_protected_sml_120d.png?ID=e1725bf3-1ec4-44bb-b65e-0a20fd4919fa"  alt="DMCA.com Protection Status" /></a>
+
+--------------------------------------------------------------------------------------------------------------------------------------
