@@ -1,24 +1,44 @@
-# bumper
-Je suis un bot conçu pour vous aider à améliorer la visibilité de votre serveur grâce au bump inter-serveur !
+**`Mise à jour : version 1.1.3`**
 
-Je suis un bot spécialement conçu pour booster la visibilité de votre serveur Discord grâce à un système de bump inter-serveur efficace et simple d'utilisation ! Avec moi, vous pouvez promouvoir votre communauté auprès d'un large réseau de serveurs partenaires, attirant ainsi de nouveaux membres actifs et engagés. Mon objectif est de vous aider à développer votre serveur en toute simplicité, en maximisant votre portée et en créant des opportunités de connexion avec d'autres utilisateurs. Faites confiance à mon système pour faire briller votre Discord et attirer l'attention qu'il mérite !
+### **Fonctionnalités du Bot Bump**
 
-**Les commandes principales** :
+### **1. Commandes Principales**
+- **`/bump`** : Promouvoir votre serveur dans tous les salons configurés.  
+  - Cooldown : 1 heure.  
+  - Gain d'XP et progression de niveau.  
+  - Badges de serveur (Débutant, Promoteur, Expert, etc.).  
 
-**`/vote`** (Permet de voté le serveur)
+- **`/vote`** : Voter pour votre serveur.  
+  - Cooldown : 24 heures.  
+  - Augmente la visibilité du serveur.  
 
-**`/top_user`** (Permet de voir le top 10 utilisateurs)
+- **`/top_server`** : Affiche le top 10 des serveurs les plus bumpés.  
+- **`/top_user`** : Affiche le top 10 des utilisateurs les plus actifs.  
 
-**`/top_server`** (Permet de voir le top 10 serveurs)
+### **2. Configuration (Admin uniquement)**
+- **`/bump_config`** : Configurer la description et la bannière du bump.  
+- **`/bump_set_channel`** : Définir le salon où les bumps seront envoyés.  
+- **`/bump_toggle`** : Activer/désactiver le bot sur le serveur.  
+- **`/ping_config`** : Activer/désactiver les rappels de bump.  
 
-**`/stats_bump`** (Permet de voir les statistiques globale)
+### **3. Statistiques et Prévisualisation**
+- **`/stats_bump`** : Affiche des statistiques détaillées (bumps, votes, vues, etc.).  
+- **`/bump_preview`** : Aperçu du bump avant envoi.  
 
-**`/bump_toggle`** (Permet d'activer ou désactiver le bot)
+### **4. Fonctionnalités Automatiques**
+- **Réinitialisation des compteurs** :  
+  - Quotidienne, hebdomadaire et mensuelle.  
+- **Création d'invitations** : Une invitation est automatiquement créée pour chaque serveur.  
+- **Attribution de rôles** : Rôles basés sur le niveau d'XP des utilisateurs.  
 
-**`/bump_set_channe`** (Permet de choisir votre salon bump)
+### **5. Sécurité et Limites**
+- **Rate Limiting** : Limite de 5 commandes par utilisateur par minute.  
+- **Permissions** : Les commandes de configuration sont réservées aux administrateurs.  
 
-**`/bump_config`** (Permet de configurer la description et lien bannière)
-
-**`/bump_preview`** (Permet de voir un aperçu avant envoie du bump)
-
-**`/bump`** (Permet de bump sur les serveurs connecté)
+### **Comment Utiliser le Bot ?**
+1. Créé une applications sur le portail dev discord.
+2. Modifier le fichier **`.env`** pour mettre le Token et l'ID du bot.
+3. Invitez le bot sur votre serveur.  
+4. Configurez le salon de bump avec **`/bump_set_channel`**.  
+5. Personnalisez votre bump avec **`/bump_config`**.  
+6. Utilisez **`/bump`** pour promouvoir votre serveur.
