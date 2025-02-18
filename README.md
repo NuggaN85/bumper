@@ -6,7 +6,7 @@
 - **`/bump`** : Promouvoir votre serveur dans tous les salons configurés.  
   - Cooldown : 1 heure.  
   - Gain d'XP et progression de niveau.  
-  - Badges de serveur (Débutant, Promoteur, Expert, etc.).  
+  - Badges de serveur (Promoteur Junior, Promoteur Avancé, Promoteur Élite, etc.).  
 
 - **`/vote`** : Voter pour votre serveur.  
   - Cooldown : 24 heures.  
