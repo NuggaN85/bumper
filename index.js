@@ -43,8 +43,17 @@ const intents = [
     GatewayIntentBits.GuildMembers
 ];
 
-// Initialisation du client avec les intents
-const client = new Client({ intents });
+// Configuration des paramètres REST
+const restConfig = {
+    timeout: 15000,
+    retries: 3
+};
+
+// Initialisation du client avec les intents et la configuration REST
+const client = new Client({
+    intents: intents,
+    rest: restConfig
+});
 
 let connection;
 let data = { servers: {}, reminders: {} };
