@@ -470,11 +470,11 @@ async function sendBump(interaction, serverData, user, guildId, cooldown) {
         .setTitle(`${guild.name} vient d'être bump !`)
         .setDescription(serverData.description || 'Aucune description fournie.')
         .setImage(serverData.bannerLink || null)
-        .setFooter({ text: `Bump par ${user.tag}`, iconURL: user.displayAvatarURL() })
+        .setFooter({ text: `Bump par ${user.tag}`, iconURL: user.displayAvatarURL({ dynamic: true }) })
         .setTimestamp()
         .setColor('#00AAFF');
 
-    const serverIconURL = guild.iconURL();
+    const serverIconURL = guild.iconURL({ dynamic: true });
     embed.setThumbnail(serverIconURL || null);
 
     // Ajout des champs de badge si le badge est défini
@@ -555,13 +555,13 @@ async function sendBump(interaction, serverData, user, guildId, cooldown) {
             const reminderEmbed = new EmbedBuilder()
                 .setTitle('🎉 Hey toi ! c’est l’heure du bump ! 🎉')
                 .setDescription("N’oublie pas de **bump ton serveur** pour rester au sommet du classement 🌟 !\n Plus tu bumps, plus ton serveur rayonne 🌍✨ ! \n\n**Tape vite </bump:1322269424832479283> et fais monter la hype ! 🚀🔥**")
-                .setFooter({ text: `Notification rappel bump`, iconURL: guild.iconURL() })
+                .setFooter({ text: `Notification rappel bump`, iconURL: guild.iconURL({ dynamic: true }) })
                 .setTimestamp()
                 .setColor('#FF6363');
             const bumpGuild = client.guilds.cache.get(guildId);
             const bumpChannel = bumpGuild?.channels.cache.get(serverData.bumpChannel);
             if (bumpChannel && bumpChannel.permissionsFor(client.user).has(PermissionFlagsBits.SendMessages)) {
-                const serverIconURL = bumpGuild.iconURL();
+                const serverIconURL = bumpGuild.iconURL({ dynamic: true });
                 reminderEmbed.setThumbnail(serverIconURL || null);
                 bumpChannel.send({ content: `<@${user.id}>`, embeds: [reminderEmbed] });
             }
@@ -573,7 +573,7 @@ async function sendBump(interaction, serverData, user, guildId, cooldown) {
         .setTitle('Bump réussi !')
         .setDescription(`✅ Le bump vient d’être envoyé avec succès !\nLe serveur a actuellement un total de **${serverData.bumpCount}** bump(s).\nN’oubliez pas que vous pouvez désactiver les rappels de bump en utilisant la commande </ping_config:1322269424832479284>.\n\nVous avez gagné **${XP_PER_BUMP} XP** !\nNiveau actuel: **${newLevel}**\nXP pour le prochain niveau: **${xpForNextLevel}**`)
         .setImage('https://i.imgur.com/Qy5DRuq.jpeg')
-        .setFooter({ text: `${guild.name}`, iconURL: guild.iconURL() })
+        .setFooter({ text: `${guild.name}`, iconURL: guild.iconURL({ dynamic: true }) })
         .setTimestamp()
         .setColor('#00AAFF');
     interaction.reply({ embeds: [responseEmbed], flags: [MessageFlags.Ephemeral] });
@@ -777,7 +777,7 @@ for (const link of allLinks) {
 if (bannerLink && !/^https?:\/\/.+/.test(bannerLink)) {
     return interaction.reply({ content: '❌ Le lien de la bannière n\'est pas valide.', flags: [MessageFlags.Ephemeral] });
 }
-    
+
     serverData.description = description;
     serverData.bannerLink = bannerLink;
     dataChanged = true;
@@ -810,10 +810,10 @@ async function handleBumpPreviewCommand(interaction, serverData, guildId) {
         .setTitle(`Prévisualisation du bump pour ${guild.name}`)
         .setDescription(serverData.description || 'Aucune description fournie.')
         .setImage(serverData.bannerLink || null)
-        .setFooter({ text: `Prévisualisation du bump`, iconURL: guild.iconURL() })
+        .setFooter({ text: `Prévisualisation du bump`, iconURL: guild.iconURL({ dynamic: true }) })
         .setTimestamp()
         .setColor('#7289DA');
-    const serverIconURL = guild.iconURL();
+    const serverIconURL = guild.iconURL({ dynamic: true });
     embed.setThumbnail(serverIconURL || null);
     interaction.reply({ content: '✨ Découvrez un aperçu du bump :', embeds: [embed], flags: [MessageFlags.Ephemeral] });
 }
@@ -927,7 +927,7 @@ async function handleVoteCommand(interaction, serverData, user, guildId) {
         .setTitle('Vote réussi !')
         .setDescription(`✅ Le vote vient d’être enregistré avec succès !\nLe serveur a actuellement un total de **${serverData.voteCount}** vote(s).`)
         .setImage('https://i.imgur.com/8a9Mc6F.jpeg')
-        .setFooter({ text: `${interaction.guild.name}`, iconURL: interaction.guild.iconURL() })
+        .setFooter({ text: `${interaction.guild.name}`, iconURL: interaction.guild.iconURL({ dynamic: true }) })
         .setTimestamp()
         .setColor('#00AAFF');
     interaction.reply({ embeds: [responseEmbed], flags: [MessageFlags.Ephemeral] });
