@@ -1,6 +1,5 @@
 'use strict';
 
-// Importation des modules nécessaires
 import * as dotenv from 'dotenv';
 import {
     Client,
@@ -24,7 +23,6 @@ import schedule from 'node-schedule';
 // Configuration et initialisation des variables d'environnement
 dotenv.config();
 
-// Vérification des variables d'environnement obligatoires
 if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID) {
     throw new Error("⚠️ Les variables d'environnement DISCORD_TOKEN et CLIENT_ID sont obligatoires.");
 }
@@ -36,21 +34,10 @@ const intents = [
     GatewayIntentBits.GuildMembers
 ];
 
-// Configuration des paramètres REST
-const restConfig = {
-    timeout: 15000,
-    retries: 3
-};
-
-// Initialisation du client avec les intents et la configuration REST
-const client = new Client({
-    intents: intents,
-    rest: restConfig
-});
+// Initialisation du client avec les intents
+const client = new Client({ intents });
 
 let connection;
-
-// Déclaration et initialisation de la variable data
 let data = { servers: {}, reminders: {} };
 let dataChanged = false;
 
@@ -67,10 +54,8 @@ async function connectToDatabase() {
 
 async function loadData() {
     try {
-        await connection.beginTransaction();
         const [serverRows] = await connection.execute('SELECT * FROM servers');
         const [userRows] = await connection.execute('SELECT * FROM users');
-        await connection.commit();
 
         data.servers = serverRows.reduce((acc, row) => {
             acc[row.guild_id] = {
@@ -87,7 +72,7 @@ async function loadData() {
                 adViews: row.ad_views,
                 voteCount: row.vote_count,
                 lastVote: row.last_vote,
-                userData: {} // Initialiser userData comme un objet vide
+                userData: {}
             };
             return acc;
         }, {});
@@ -105,40 +90,15 @@ async function loadData() {
 
         console.log('✅ Données chargées depuis MySQL.');
     } catch (error) {
-        await connection.rollback();
         console.error("⚠️ Erreur lors du chargement des données depuis MySQL:", error);
-        data = { servers: {}, reminders: {} }; // Réinitialiser data en cas d'erreur
+        data = { servers: {}, reminders: {} };
     }
 }
 
 async function saveData() {
     try {
-        await connection.beginTransaction();
-
-        if (!data.servers || typeof data.servers !== 'object') {
-            console.error("⚠️ data.servers est undefined ou null.");
-            return;
-        }
-
         for (const [guildId, serverData] of Object.entries(data.servers)) {
             const { enabled, bumpChannel, description, bannerLink, reminders, inviteLink, adViews, voteCount, lastVote, bumpCount, bumpCountToday, bumpCountWeek, bumpCountMonth } = serverData;
-
-            const params = [
-                enabled !== undefined ? enabled : null,
-                bumpChannel !== undefined ? bumpChannel : null,
-                description !== undefined ? description : null,
-                bannerLink !== undefined ? bannerLink : null,
-                reminders !== undefined ? reminders : null,
-                inviteLink !== undefined ? inviteLink : null,
-                adViews !== undefined ? adViews : null,
-                voteCount !== undefined ? voteCount : null,
-                lastVote !== undefined ? lastVote : null,
-                bumpCount !== undefined ? bumpCount : null,
-                bumpCountToday !== undefined ? bumpCountToday : null,
-                bumpCountWeek !== undefined ? bumpCountWeek : null,
-                bumpCountMonth !== undefined ? bumpCountMonth : null,
-                guildId
-            ];
 
             await connection.execute(
                 `INSERT INTO servers (enabled, bump_channel, description, banner_link, reminders, invite_link, ad_views, vote_count, last_vote, bump_count, bump_count_today, bump_count_week, bump_count_month, guild_id)
@@ -157,25 +117,11 @@ async function saveData() {
                 bump_count_today = VALUES(bump_count_today),
                 bump_count_week = VALUES(bump_count_week),
                 bump_count_month = VALUES(bump_count_month)`,
-                params
+                [enabled, bumpChannel, description, bannerLink, reminders, inviteLink, adViews, voteCount, lastVote, bumpCount, bumpCountToday, bumpCountWeek, bumpCountMonth, guildId]
             );
-
-            // Vérifiez et initialisez userData si nécessaire
-            if (!serverData.userData || typeof serverData.userData !== 'object') {
-                serverData.userData = {};
-            }
 
             for (const [userId, userData] of Object.entries(serverData.userData)) {
                 const { bumpCount, xp, voteCount, lastLevel } = userData;
-
-                const userParams = [
-                    bumpCount !== undefined ? bumpCount : null,
-                    xp !== undefined ? xp : null,
-                    voteCount !== undefined ? voteCount : null,
-                    lastLevel !== undefined ? lastLevel : null,
-                    guildId,
-                    userId
-                ];
 
                 await connection.execute(
                     `INSERT INTO users (bump_count, xp, vote_count, last_level, guild_id, user_id)
@@ -185,15 +131,13 @@ async function saveData() {
                     xp = VALUES(xp),
                     vote_count = VALUES(vote_count),
                     last_level = VALUES(last_level)`,
-                    userParams
+                    [bumpCount, xp, voteCount, lastLevel, guildId, userId]
                 );
             }
         }
 
-        await connection.commit();
         console.log('✅ Données sauvegardées dans MySQL.');
     } catch (error) {
-        await connection.rollback();
         console.error("⚠️ Erreur lors de la sauvegarde des données dans MySQL:", error);
     }
 }
@@ -206,9 +150,7 @@ async function saveDataIfChanged() {
 }
 
 // Fonction pour mettre à jour la présence
-async function updatePresence(guild) {
-    if (guild) delete data.servers[guild.id];
-    dataChanged = true;
+async function updatePresence() {
     client.user.setActivity({ name: `${client.guilds.cache.size} serveurs`, type: ActivityType.Watching });
     client.user.setStatus('online');
 }
@@ -232,10 +174,7 @@ client.once("ready", async () => {
     await connectToDatabase();
     await loadData();
     updatePresence();
-    schedule.scheduleJob('*/5 * * * *', () => {
-        dataChanged = true;
-        saveDataIfChanged();
-    });
+    schedule.scheduleJob('*/5 * * * *', saveDataIfChanged);
     const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
     try {
         console.log('🔄 Déploiement des commandes...');
@@ -275,7 +214,7 @@ client.on("guildCreate", async guild => {
 });
 
 client.on("guildDelete", guild => {
-    updatePresence(guild);
+    updatePresence();
 });
 
 client.on("inviteDelete", async invite => {
@@ -326,7 +265,7 @@ async function handleInteraction(interaction) {
             adViews: 0,
             voteCount: 0,
             lastVote: 0,
-            userData: {} // Initialiser userData comme un objet vide
+            userData: {}
         };
         dataChanged = true;
     }
@@ -526,8 +465,8 @@ async function sendBump(interaction, serverData, user, guildId, cooldown) {
 
     // Ajout de l'ID du serveur
     embed.addFields({ name: '🆔 ID du Serveur:', value: `\`\`\`\n${guildId}\n\`\`\``, inline: true });
-    
-        // Ajout des boutons
+
+    // Ajout des boutons
     const joinButton = new ButtonBuilder()
         .setLabel('Rejoindre le serveur')
         .setURL(serverData.inviteLink)
@@ -878,7 +817,10 @@ async function handleStatsBumpCommand(interaction) {
         .setTimestamp();
 
     const activityBar = createActivityBar(stats);
-    if (activityBar) embed.addFields({ name: 'Tendance d\'activité:', value: activityBar, inline: false });
+    if (activityBar) {
+        embed.addFields({ name: 'Tendance d\'activité:', value: activityBar, inline: false });
+    }
+
     await interaction.reply({ embeds: [embed], flags: [MessageFlags.Ephemeral] });
 }
 
