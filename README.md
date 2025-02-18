@@ -36,12 +36,13 @@
 - **Permissions** : Les commandes de configuration sont réservées aux administrateurs.  
 
 ### **Comment Utiliser le Bot ?**
-1. Créé une applications sur le portail dev discord.
-2. Modifier le fichier **`.env`** pour mettre le Token et l'ID du bot.
-3. Invitez le bot sur votre serveur.  
-4. Configurez le salon de bump avec **`/bump_set_channel`**.  
-5. Personnalisez votre bump avec **`/bump_config`**.  
-6. Utilisez **`/bump`** pour promouvoir votre serveur.
+1. Créé une applications sur le [portail dev discord](https://discord.com/developers/applications).
+2. Modifier le fichier **`.env`** pour mettre les informations.
+3. Uploader la base **SQL** sur votre **phpMyAdmin**.
+4. Invitez le bot sur votre serveur.  
+5. Configurez le salon de bump avec **`/bump_set_channel`**.  
+6. Personnalisez votre bump avec **`/bump_config`**.  
+7. Utilisez **`/bump`** pour promouvoir votre serveur.
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
