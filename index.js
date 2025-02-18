@@ -15,7 +15,8 @@ import {
     ButtonStyle,
     ActivityType,
     ChannelType,
-    MessageFlags
+    MessageFlags,
+    PermissionFlagsBits
 } from 'discord.js';
 import { createConnection } from 'mysql2/promise';
 import schedule from 'node-schedule';
@@ -306,7 +307,7 @@ async function createInviteIfNeeded(guild) {
             return;
         }
         const firstChannel = guild.channels.cache.find(channel =>
-            channel.type === ChannelType.GuildText && channel.permissionsFor(me).has('CREATE_INSTANT_INVITE')
+            channel.type === ChannelType.GuildText && channel.permissionsFor(me).has(PermissionFlagsBits.CreateInstantInvite)
         );
         if (!firstChannel) {
             console.error(`⚠️ Aucun canal de texte disponible pour créer une invitation sur le serveur ${guild.name}.`);
@@ -490,7 +491,7 @@ async function sendBump(interaction, serverData, user, guildId, cooldown) {
         if (serverConfig.bumpChannel) {
             const bumpGuild = client.guilds.cache.get(server_id);
             const bumpChannel = bumpGuild?.channels.cache.get(serverConfig.bumpChannel);
-            if (bumpChannel && bumpChannel.permissionsFor(client.user).has('SEND_MESSAGES')) {
+            if (bumpChannel && bumpChannel.permissionsFor(client.user).has(PermissionFlagsBits.SendMessages)) {
                 bumpChannels.push(bumpChannel);
                 serverConfig.adViews = (serverConfig.adViews || 0) + 1;
             }
@@ -535,7 +536,7 @@ async function sendBump(interaction, serverData, user, guildId, cooldown) {
                 .setColor('#FF6363');
             const bumpGuild = client.guilds.cache.get(guildId);
             const bumpChannel = bumpGuild?.channels.cache.get(serverData.bumpChannel);
-            if (bumpChannel && bumpChannel.permissionsFor(client.user).has('SEND_MESSAGES')) {
+            if (bumpChannel && bumpChannel.permissionsFor(client.user).has(PermissionFlagsBits.SendMessages)) {
                 const serverIconURL = bumpGuild.iconURL();
                 reminderEmbed.setThumbnail(serverIconURL || null);
                 bumpChannel.send({ content: `<@${user.id}>`, embeds: [reminderEmbed] });
@@ -628,7 +629,7 @@ async function handlePingConfigCommand(interaction, serverData) {
 }
 
 async function handleBumpToggleCommand(interaction, serverData) {
-    if (!interaction.member.permissions.has('ADMINISTRATOR')) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
         return interaction.reply({
             content: '❌ Vous devez être administrateur pour utiliser cette commande.',
             flags: [MessageFlags.Ephemeral]
@@ -693,7 +694,7 @@ async function handleTopUserCommand(interaction, guildId) {
 }
 
 async function handleBumpConfigCommand(interaction, serverData) {
-    if (!interaction.member.permissions.has('ADMINISTRATOR')) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
         return interaction.reply({
             content: '❌ Vous devez être administrateur pour utiliser cette commande.',
             flags: [MessageFlags.Ephemeral]
@@ -738,7 +739,7 @@ async function handleBumpConfigModalSubmit(interaction, serverData) {
 }
 
 async function handleBumpSetChannelCommand(interaction, serverData, channel) {
-    if (!interaction.member.permissions.has('ADMINISTRATOR')) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
         return interaction.reply({
             content: '❌ Vous devez être administrateur pour utiliser cette commande.',
             flags: [MessageFlags.Ephemeral]
@@ -751,7 +752,7 @@ async function handleBumpSetChannelCommand(interaction, serverData, channel) {
 }
 
 async function handleBumpPreviewCommand(interaction, serverData, guildId) {
-    if (!interaction.member.permissions.has('ADMINISTRATOR')) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
         return interaction.reply({
             content: '❌ Vous devez être administrateur pour utiliser cette commande.',
             flags: [MessageFlags.Ephemeral]
