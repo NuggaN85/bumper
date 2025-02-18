@@ -106,12 +106,27 @@ async function loadData() {
 
 async function saveData() {
     try {
+        const serverValues = [];
+        const userValues = [];
+
         for (const [guildId, serverData] of Object.entries(data.servers)) {
             const { enabled, bumpChannel, description, bannerLink, reminders, inviteLink, adViews, voteCount, lastVote, bumpCount, bumpCountToday, bumpCountWeek, bumpCountMonth } = serverData;
 
-            await connection.execute(
+            serverValues.push([enabled, bumpChannel, description, bannerLink, reminders, inviteLink, adViews, voteCount, lastVote, bumpCount, bumpCountToday, bumpCountWeek, bumpCountMonth, guildId]);
+
+            for (const [userId, userData] of Object.entries(serverData.userData)) {
+                const { bumpCount, xp, voteCount, lastLevel } = userData;
+
+                userValues.push([bumpCount, xp, voteCount, lastLevel, guildId, userId]);
+            }
+        }
+
+        await connection.beginTransaction();
+
+        if (serverValues.length > 0) {
+            await connection.query(
                 `INSERT INTO servers (enabled, bump_channel, description, banner_link, reminders, invite_link, ad_views, vote_count, last_vote, bump_count, bump_count_today, bump_count_week, bump_count_month, guild_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES ?
                 ON DUPLICATE KEY UPDATE
                 enabled = VALUES(enabled),
                 bump_channel = VALUES(bump_channel),
@@ -126,27 +141,28 @@ async function saveData() {
                 bump_count_today = VALUES(bump_count_today),
                 bump_count_week = VALUES(bump_count_week),
                 bump_count_month = VALUES(bump_count_month)`,
-                [enabled, bumpChannel, description, bannerLink, reminders, inviteLink, adViews, voteCount, lastVote, bumpCount, bumpCountToday, bumpCountWeek, bumpCountMonth, guildId]
+                [serverValues]
             );
-
-            for (const [userId, userData] of Object.entries(serverData.userData)) {
-                const { bumpCount, xp, voteCount, lastLevel } = userData;
-
-                await connection.execute(
-                    `INSERT INTO users (bump_count, xp, vote_count, last_level, guild_id, user_id)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE
-                    bump_count = VALUES(bump_count),
-                    xp = VALUES(xp),
-                    vote_count = VALUES(vote_count),
-                    last_level = VALUES(last_level)`,
-                    [bumpCount, xp, voteCount, lastLevel, guildId, userId]
-                );
-            }
         }
+
+        if (userValues.length > 0) {
+            await connection.query(
+                `INSERT INTO users (bump_count, xp, vote_count, last_level, guild_id, user_id)
+                VALUES ?
+                ON DUPLICATE KEY UPDATE
+                bump_count = VALUES(bump_count),
+                xp = VALUES(xp),
+                vote_count = VALUES(vote_count),
+                last_level = VALUES(last_level)`,
+                [userValues]
+            );
+        }
+
+        await connection.commit();
 
         console.log('✅ Données sauvegardées dans MySQL.');
     } catch (error) {
+        await connection.rollback();
         console.error("⚠️ Erreur lors de la sauvegarde des données dans MySQL:", error);
     }
 }
