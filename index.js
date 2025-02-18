@@ -12,6 +12,8 @@ import {
     TextInputBuilder,
     TextInputStyle,
     ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
     ActivityType,
     ChannelType,
     MessageFlags
@@ -463,34 +465,36 @@ async function processBumpQueue() {
 async function sendBump(interaction, serverData, user, guildId, cooldown) {
     const now = getCurrentTimestamp();
     const guild = client.guilds.cache.get(guildId);
-    let badge = '';
-    let badgeEmoji = '';
-    let nextBadgeThreshold = 0;
+    let badge = 'Aucun';
+    let badgeEmoji = '❌';
+    let nextBadgeThreshold = 10;
     let currentBadgeThreshold = 0;
 
     // Détermination du badge en fonction du nombre de bumps
-    if (serverData.bumpCount < 10) {
-        badge = 'Aucun'; badgeEmoji = '❌';
-        nextBadgeThreshold = 10;
-    } else if (serverData.bumpCount >= 10 && serverData.bumpCount < 100) {
-        badge = 'Promoteur Junior'; badgeEmoji = '🌱';
+    if (serverData.bumpCount >= 10 && serverData.bumpCount < 100) {
+        badge = 'Promoteur Junior';
+        badgeEmoji = '🌱';
         nextBadgeThreshold = 100;
         currentBadgeThreshold = 10;
     } else if (serverData.bumpCount >= 100 && serverData.bumpCount < 1000) {
-        badge = 'Promoteur Avancé'; badgeEmoji = '📢';
+        badge = 'Promoteur Avancé';
+        badgeEmoji = '📢';
         nextBadgeThreshold = 1000;
         currentBadgeThreshold = 100;
     } else if (serverData.bumpCount >= 1000 && serverData.bumpCount < 10000) {
-        badge = 'Promoteur Élite'; badgeEmoji = '🚀';
+        badge = 'Promoteur Élite';
+        badgeEmoji = '🚀';
         nextBadgeThreshold = 10000;
         currentBadgeThreshold = 1000;
     } else if (serverData.bumpCount >= 10000 && serverData.bumpCount < 10010) {
-        badge = 'Maître Promoteur'; badgeEmoji = '👑';
+        badge = 'Maître Promoteur';
+        badgeEmoji = '👑';
         nextBadgeThreshold = 10010;
         currentBadgeThreshold = 10000;
     } else if (serverData.bumpCount >= 10100) {
-        badge = 'Légende de la Promotion'; badgeEmoji = '🔱';
-        nextBadgeThreshold = Infinity;
+        badge = 'Légende de la Promotion';
+        badgeEmoji = '🔱';
+        nextBadgeThreshold = Infinity; // No next badge
         currentBadgeThreshold = 10100;
     }
 
@@ -520,6 +524,27 @@ async function sendBump(interaction, serverData, user, guildId, cooldown) {
         });
     }
 
+    // Ajout de l'ID du serveur
+    embed.addFields({ name: '🆔 ID du Serveur:', value: `\`\`\`\n${guildId}\n\`\`\``, inline: true });
+    
+        // Ajout des boutons
+    const joinButton = new ButtonBuilder()
+        .setLabel('Rejoindre le serveur')
+        .setURL(serverData.inviteLink)
+        .setStyle(ButtonStyle.Link);
+
+    const addExobumpButton = new ButtonBuilder()
+        .setLabel('Ajouter Exobump')
+        .setURL('https://discord.com/discovery/applications/1316463410682007572')
+        .setStyle(ButtonStyle.Link);
+
+    const voteExobumpButton = new ButtonBuilder()
+        .setLabel('Voter pour Exobump')
+        .setURL('https://discord.ly/exobump')
+        .setStyle(ButtonStyle.Link);
+
+    const actionRow = new ActionRowBuilder().addComponents(joinButton, addExobumpButton, voteExobumpButton);
+
     // Envoi de l'embed dans les canaux de bump
     const bumpChannels = [];
     Object.entries(data.servers).forEach(([server_id, serverConfig]) => {
@@ -532,7 +557,8 @@ async function sendBump(interaction, serverData, user, guildId, cooldown) {
             }
         }
     });
-    for (const bumpChannel of bumpChannels) bumpChannel.send({ embeds: [embed] });
+
+    for (const bumpChannel of bumpChannels) bumpChannel.send({ embeds: [embed], components: [actionRow] });
 
     // Mise à jour des données du serveur
     serverData.bumpCount = (serverData.bumpCount || 0) + 1;
