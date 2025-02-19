@@ -173,6 +173,7 @@ async function saveData() {
     } catch (error) {
         await connection.rollback();
         console.error("⚠️ Erreur lors de la sauvegarde des données dans MySQL:", error);
+        throw error; // Rejeter l'erreur pour une gestion supplémentaire si nécessaire
     }
 }
 
@@ -764,28 +765,28 @@ async function handleBumpConfigModalSubmit(interaction, serverData) {
         return interaction.reply({ content: '❌ La description doit contenir au moins 400 caractères.', flags: [MessageFlags.Ephemeral] });
     }
 
-// Expression régulière pour les domaines interdits
-const forbiddenDomainsRegex = /\bhttps?:\/\/(?:[^\s/$.?#]+\.)?(iplogger?|bitly|tinyurl|goo\.gl|ow\.ly|t\.co|is\.gd|buff\.ly|adf\.ly|tiny\.cc|lnkd\.in|db\.tt|qr\.ae|adfoc\.us|bit\.do|tiny\.pl|cur\.lv|ity\.im|q\.gs|po\.st|bc\.vc|twitthis\.com|u\.to|j\.mp|buzurl\.com|cutt\.us|u\.bb|yourls\.org|x\.co|prettylinkpro\.com|scrnch\.me|filoops\.info|vzturl\.com|qr\.net|1url\.com|tweez\.me|v\.gd|tr\.im|link\.zip\.net|pornhub\.com|xvideos\.com|redtube\.com|youporn\.com|xnxx\.com|porn\.com|xhamster\.com|tube8\.com|beeg\.com|spankbang\.com)\b[^\s]*/;
+    // Expression régulière pour les domaines interdits
+    const forbiddenDomainsRegex = /\bhttps?:\/\/(?:[^\s/$.?#]+\.)?(iplogger?|bitly|tinyurl|goo\.gl|ow\.ly|t\.co|is\.gd|buff\.ly|adf\.ly|tiny\.cc|lnkd\.in|db\.tt|qr\.ae|adfoc\.us|bit\.do|tiny\.pl|cur\.lv|ity\.im|q\.gs|po\.st|bc\.vc|twitthis\.com|u\.to|j\.mp|buzurl\.com|cutt\.us|u\.bb|yourls\.org|x\.co|prettylinkpro\.com|scrnch\.me|filoops\.info|vzturl\.com|qr\.net|1url\.com|tweez\.me|v\.gd|tr\.im|link\.zip\.net|pornhub\.com|xvideos\.com|redtube\.com|youporn\.com|xnxx\.com|porn\.com|xhamster\.com|tube8\.com|beeg\.com|spankbang\.com)\b[^\s]*/;
 
-// Fonction pour extraire les liens de la description
-function extractLinks(text) {
-    const urlRegex = /https?:\/\/[^\s]+/g;
-    return text.match(urlRegex) || [];
-}
-
-// Vérification des liens interdits dans la description et le bannerLink
-const descriptionLinks = extractLinks(description);
-const allLinks = [...descriptionLinks, bannerLink].filter(Boolean);
-
-for (const link of allLinks) {
-    if (forbiddenDomainsRegex.test(link)) {
-        return interaction.reply({ content: '❌ Le lien fourni est interdit.', flags: [MessageFlags.Ephemeral] });
+    // Fonction pour extraire les liens de la description
+    function extractLinks(text) {
+        const urlRegex = /https?:\/\/[^\s]+/g;
+        return text.match(urlRegex) || [];
     }
-}
 
-if (bannerLink && !/^https?:\/\/.+/.test(bannerLink)) {
-    return interaction.reply({ content: '❌ Le lien de la bannière n\'est pas valide.', flags: [MessageFlags.Ephemeral] });
-}
+    // Vérification des liens interdits dans la description et le bannerLink
+    const descriptionLinks = extractLinks(description);
+    const allLinks = [...descriptionLinks, bannerLink].filter(Boolean);
+
+    for (const link of allLinks) {
+        if (forbiddenDomainsRegex.test(link)) {
+            return interaction.reply({ content: '❌ Le lien fourni est interdit.', flags: [MessageFlags.Ephemeral] });
+        }
+    }
+
+    if (bannerLink && !/^https?:\/\/.+/.test(bannerLink)) {
+        return interaction.reply({ content: '❌ Le lien de la bannière n\'est pas valide.', flags: [MessageFlags.Ephemeral] });
+    }
 
     serverData.description = description;
     serverData.bannerLink = bannerLink;
