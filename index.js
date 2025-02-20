@@ -118,15 +118,21 @@ async function saveData() {
         const serverValues = [];
         const userValues = [];
 
-        for (const [guildId, serverData] of Object.entries(data.servers)) {
-            const { enabled, bumpChannel, description, bannerLink, reminders, inviteLink, adViews, voteCount, lastVote, bumpCount, bumpCountToday, bumpCountWeek, bumpCountMonth } = serverData;
+        // Vérifiez que data.servers est défini et est un objet
+        if (data.servers && typeof data.servers === 'object') {
+            for (const [guildId, serverData] of Object.entries(data.servers)) {
+                const { enabled, bumpChannel, description, bannerLink, reminders, inviteLink, adViews, voteCount, lastVote, bumpCount, bumpCountToday, bumpCountWeek, bumpCountMonth } = serverData;
 
-            serverValues.push([enabled, bumpChannel, description, bannerLink, reminders, inviteLink, adViews, voteCount, lastVote, bumpCount, bumpCountToday, bumpCountWeek, bumpCountMonth, guildId]);
+                serverValues.push([enabled, bumpChannel, description, bannerLink, reminders, inviteLink, adViews, voteCount, lastVote, bumpCount, bumpCountToday, bumpCountWeek, bumpCountMonth, guildId]);
 
-            for (const [userId, userData] of Object.entries(serverData.userData)) {
-                const { bumpCount, xp, voteCount, lastLevel } = userData;
+                // Vérifiez que serverData.userData est défini et est un objet
+                if (serverData.userData && typeof serverData.userData === 'object') {
+                    for (const [userId, userData] of Object.entries(serverData.userData)) {
+                        const { bumpCount, xp, voteCount, lastLevel } = userData;
 
-                userValues.push([bumpCount, xp, voteCount, lastLevel, guildId, userId]);
+                        userValues.push([bumpCount, xp, voteCount, lastLevel, guildId, userId]);
+                    }
+                }
             }
         }
 
@@ -334,27 +340,47 @@ client.login(process.env.DISCORD_TOKEN).then(() => {
 
 // Fonctions supplémentaires
 async function createInviteIfNeeded(guild) {
-    if (!data.servers[guild.id] || !data.servers[guild.id].inviteLink) {
-        const me = guild.members.me;
-        if (!me) {
-            console.error(`⚠️ Le bot n'est pas membre du serveur ${guild.name}.`);
-            return;
-        }
-        const firstChannel = guild.channels.cache.find(channel =>
-            channel.type === ChannelType.GuildText && channel.permissionsFor(me).has(PermissionFlagsBits.CreateInstantInvite)
-        );
-        if (!firstChannel) {
-            console.error(`⚠️ Aucun canal de texte disponible pour créer une invitation sur le serveur ${guild.name}.`);
-            return;
-        }
-        try {
-            const invite = await guild.invites.create(firstChannel.id, { maxAge: 0, maxUses: 0 });
-            data.servers[guild.id] = { ...data.servers[guild.id], inviteLink: invite.url, adViews: 0 };
-            dataChanged = true;
-            await saveDataIfChanged();
-        } catch (error) {
-            console.error(`⚠️ Erreur lors de la création de l'invitation pour le serveur ${guild.name}:`, error);
-        }
+    if (!data.servers[guild.id]) {
+        data.servers[guild.id] = {
+            enabled: true,
+            bumpChannel: null,
+            description: '',
+            bannerLink: '',
+            reminders: false,
+            bumpCount: 0,
+            bumpCountToday: 0,
+            bumpCountWeek: 0,
+            bumpCountMonth: 0,
+            lastBump: 0,
+            inviteLink: '',
+            adViews: 0,
+            voteCount: 0,
+            lastVote: 0,
+            userData: {}
+        };
+        dataChanged = true;
+    }
+
+    const me = guild.members.me;
+    if (!me) {
+        console.error(`⚠️ Le bot n'est pas membre du serveur ${guild.name}.`);
+        return;
+    }
+    const firstChannel = guild.channels.cache.find(channel =>
+        channel.type === ChannelType.GuildText && channel.permissionsFor(me).has(PermissionFlagsBits.CreateInstantInvite)
+    );
+    if (!firstChannel) {
+        console.error(`⚠️ Aucun canal de texte disponible pour créer une invitation sur le serveur ${guild.name}.`);
+        return;
+    }
+    try {
+        const invite = await guild.invites.create(firstChannel.id, { maxAge: 0, maxUses: 0 });
+        data.servers[guild.id].inviteLink = invite.url;
+        data.servers[guild.id].adViews = 0;
+        dataChanged = true;
+        await saveDataIfChanged();
+    } catch (error) {
+        console.error(`⚠️ Erreur lors de la création de l'invitation pour le serveur ${guild.name}:`, error);
     }
 }
 
